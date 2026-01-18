@@ -1,0 +1,30 @@
+genrate djnago secret key
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+
+postgres
+# 1. Install PostgreSQL from: https://www.postgresql.org/download/windows/
+
+# 2. Open PowerShell as Admin and create database
+psql -U postgres
+
+# In PostgreSQL shell:
+CREATE DATABASE rag_chatbot_db;
+CREATE USER rag_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE rag_chatbot_db TO rag_user;
+\q
+
+# 3. Test connection
+psql -U rag_user -d rag_chatbot_db -h localhost
+
+
+# Download from: https://github.com/microsoftarchive/redis/releases
+# Or use WSL:
+wsl --install
+wsl
+sudo apt update
+sudo apt install redis-server
+sudo service redis-server start
+
+# Test Redis
+redis-cli ping
+# Should return: PONG

@@ -7,7 +7,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from django.conf import settings
 from .models import Document, DocumentCollection, DocumentChunk
-from  pypdf import PdfReader
+from pypdf import PdfReader
 
 
 class DocumentProcessingService:
@@ -32,7 +32,7 @@ class DocumentProcessingService:
             
             # Get page count
             with open(document.file.path, 'rb') as f:
-                pdf_reader = PyPDF2.PdfReader(f)
+                pdf_reader = PdfReader(f)
                 document.page_count = len(pdf_reader.pages)
             
             # Split into chunks

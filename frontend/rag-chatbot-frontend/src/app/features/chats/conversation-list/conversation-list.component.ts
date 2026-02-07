@@ -45,6 +45,9 @@ import { DocumentCollection } from '../../../core/models/document.model';
         <div class="modal-content" (click)="$event.stopPropagation()">
           <h2>New Conversation</h2>
           <form (ngSubmit)="createConversation()">
+            <div class="error-message" *ngIf="createError">
+              {{ createError }}
+            </div>
             <div class="form-group">
               <label>Collection</label>
               <select [(ngModel)]="newConversation.collection" name="collection" required>
@@ -60,7 +63,9 @@ import { DocumentCollection } from '../../../core/models/document.model';
             </div>
             <div class="modal-actions">
               <button type="button" (click)="showCreateModal = false" class="btn-secondary">Cancel</button>
-              <button type="submit" class="btn-primary">Create</button>
+              <button type="submit" class="btn-primary" [disabled]="!newConversation.collection || !newConversation.title?.trim() || creating">
+                {{ creating ? 'Creating...' : 'Create' }}
+              </button>
             </div>
           </form>
         </div>
@@ -148,6 +153,15 @@ import { DocumentCollection } from '../../../core/models/document.model';
       justify-content: flex-end;
       margin-top: 1.5rem;
     }
+    .error-message {
+      background: #fff5f5;
+      color: #c53030;
+      border: 1px solid #feb2b2;
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
     .btn-primary, .btn-secondary {
       padding: 0.75rem 1.5rem;
       border: none;
@@ -168,6 +182,8 @@ export class ConversationListComponent implements OnInit {
   conversations: Conversation[] = [];
   collections: DocumentCollection[] = [];
   showCreateModal = false;
+  creating = false;
+  createError = '';
   newConversation = { collection: '', title: 'New Conversation' };
 
   constructor(
@@ -197,11 +213,29 @@ export class ConversationListComponent implements OnInit {
   }
 
   createConversation() {
-    this.chatService.createConversation(this.newConversation).subscribe({
+    const title = this.newConversation.title?.trim();
+    if (!this.newConversation.collection || !title || this.creating) {
+      return;
+    }
+    this.creating = true;
+    this.createError = '';
+    this.chatService.createConversation({
+      ...this.newConversation,
+      title
+    }).subscribe({
       next: () => {
         this.showCreateModal = false;
+        this.creating = false;
         this.newConversation = { collection: '', title: 'New Conversation' };
         this.loadConversations();
+      },
+      error: (error) => {
+        this.creating = false;
+        this.createError =
+          error?.error?.error ||
+          error?.error?.detail ||
+          error?.message ||
+          'Failed to create conversation.';
       }
     });
   }

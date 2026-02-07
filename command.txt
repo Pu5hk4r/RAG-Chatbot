@@ -13,6 +13,10 @@ CREATE USER rag_user WITH PASSWORD 'your_password';
 GRANT ALL PRIVILEGES ON DATABASE rag_chatbot_db TO rag_user;
 \q
 
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+
 # 3. Test connection
 psql -U rag_user -d rag_chatbot_db -h localhost
 

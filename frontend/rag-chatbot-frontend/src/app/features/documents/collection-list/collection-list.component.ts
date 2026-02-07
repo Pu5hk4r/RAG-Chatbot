@@ -53,6 +53,9 @@ import { DocumentCollection } from '../../../core/models/document.model';
         <div class="modal-content" (click)="$event.stopPropagation()">
           <h2>Create New Collection</h2>
           <form (ngSubmit)="createCollection()">
+            <div class="error-message" *ngIf="createError">
+              {{ createError }}
+            </div>
             <div class="form-group">
               <label>Name</label>
               <input type="text" [(ngModel)]="newCollection.name" name="name" required />
@@ -63,7 +66,9 @@ import { DocumentCollection } from '../../../core/models/document.model';
             </div>
             <div class="modal-actions">
               <button type="button" (click)="showCreateModal = false" class="btn-secondary">Cancel</button>
-              <button type="submit" class="btn-primary">Create</button>
+              <button type="submit" class="btn-primary" [disabled]="!newCollection.name?.trim() || creating">
+                {{ creating ? 'Creating...' : 'Create' }}
+              </button>
             </div>
           </form>
         </div>
@@ -174,6 +179,15 @@ import { DocumentCollection } from '../../../core/models/document.model';
       justify-content: flex-end;
       margin-top: 1.5rem;
     }
+    .error-message {
+      background: #fff5f5;
+      color: #c53030;
+      border: 1px solid #feb2b2;
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
     .btn-primary, .btn-secondary {
       padding: 0.75rem 1.5rem;
       border: none;
@@ -199,6 +213,8 @@ export class CollectionListComponent implements OnInit {
   collections: DocumentCollection[] = [];
   loading = true;
   showCreateModal = false;
+  creating = false;
+  createError = '';
   newCollection = { name: '', description: '' };
 
   constructor(private documentService: DocumentService) {}
@@ -220,11 +236,26 @@ export class CollectionListComponent implements OnInit {
   }
 
   createCollection() {
+    const name = this.newCollection.name?.trim();
+    if (!name || this.creating) {
+      return;
+    }
+    this.creating = true;
+    this.createError = '';
     this.documentService.createCollection(this.newCollection).subscribe({
       next: () => {
         this.showCreateModal = false;
+        this.creating = false;
         this.newCollection = { name: '', description: '' };
         this.loadCollections();
+      },
+      error: (error) => {
+        this.creating = false;
+        this.createError =
+          error?.error?.error ||
+          error?.error?.detail ||
+          error?.message ||
+          'Failed to create collection.';
       }
     });
   }

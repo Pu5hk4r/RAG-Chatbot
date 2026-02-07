@@ -1,10 +1,10 @@
 
-
 // ============================================
 // src/app/core/services/auth.service.ts
 // ============================================
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ApiService } from './api.service';
 import { User, LoginRequest, RegisterRequest, AuthResponse } from '../models/user.model';
 
@@ -25,7 +25,6 @@ export class AuthService {
     return this.api.post<AuthResponse>('/auth/login/', credentials).pipe(
       tap(response => {
         this.setToken(response.token);
-        this.loadCurrentUser();
       })
     );
   }
@@ -54,7 +53,14 @@ export class AuthService {
   loadCurrentUser(): void {
     this.api.get<User>('/users/me/').subscribe({
       next: user => this.currentUserSubject.next(user),
-      error: () => this.logout()
+      error: (error: HttpErrorResponse) => {
+        // Only clear token on auth failures; keep it for transient/network errors.
+        if (error?.status === 401 || error?.status === 403) {
+          this.logout();
+        } else {
+          this.currentUserSubject.next(null);
+        }
+      }
     });
   }
 

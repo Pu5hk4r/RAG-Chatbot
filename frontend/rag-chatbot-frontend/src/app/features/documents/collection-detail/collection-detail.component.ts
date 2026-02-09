@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../../shared/components/navbars/navbar.component';
@@ -21,7 +21,7 @@ import { DocumentCollection, Document } from '../../../core/models/document.mode
         <div class="actions">
           <label class="btn-primary upload-btn">
             📤 Upload PDF
-            <input type="file" (change)="onFileSelected($event)" accept=".pdf" hidden />
+            <input #fileInput type="file" (change)="onFileSelected($event)" accept=".pdf" hidden />
           </label>
           <button (click)="createVectorDB()" 
                   [disabled]="collection.has_vectordb || uploading"
@@ -140,6 +140,7 @@ import { DocumentCollection, Document } from '../../../core/models/document.mode
 export class CollectionDetailComponent implements OnInit {
   collection: DocumentCollection | null = null;
   uploading = false;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   constructor(
     private route: ActivatedRoute,
@@ -149,6 +150,18 @@ export class CollectionDetailComponent implements OnInit {
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.loadCollection(id);
+  }
+
+  ngAfterViewInit() {
+    // If navigated with state requesting the upload dialog, open the file picker
+    try {
+      const state: any = history.state || {};
+      if (state.openUpload && this.fileInput) {
+        setTimeout(() => this.fileInput.nativeElement.click(), 200);
+      }
+    } catch (e) {
+      // ignore
+    }
   }
 
   loadCollection(id: string) {

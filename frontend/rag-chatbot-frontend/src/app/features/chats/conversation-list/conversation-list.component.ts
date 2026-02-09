@@ -57,10 +57,34 @@ import { DocumentCollection } from '../../../core/models/document.model';
                 </option>
               </select>
             </div>
-            <div class="form-group">
-              <label>Title</label>
-              <input type="text" [(ngModel)]="newConversation.title" name="title" required />
-            </div>
+              <div class="form-group">
+                <label>Title</label>
+                <input type="text" [(ngModel)]="newConversation.title" name="title" required />
+              </div>
+
+              <div class="form-group">
+                <label>LLM Model</label>
+                <select [(ngModel)]="newConversation.llm_model" name="llm_model">
+                  <option value="meta-llama/Meta-Llama-3-8B-Instruct">meta-llama/Meta-Llama-3-8B-Instruct</option>
+                  <option value="mistralai/Mistral-7B-Instruct-v0.2">mistralai/Mistral-7B-Instruct-v0.2</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Temperature</label>
+                <input type="range" min="0" max="1" step="0.01" [(ngModel)]="newConversation.temperature" name="temperature" />
+                <div>{{ newConversation.temperature }}</div>
+              </div>
+
+              <div class="form-group">
+                <label>Max Tokens</label>
+                <input type="number" [(ngModel)]="newConversation.max_tokens" name="max_tokens" min="128" />
+              </div>
+
+              <div class="form-group">
+                <label>top_k</label>
+                <input type="number" [(ngModel)]="newConversation.top_k" name="top_k" min="1" />
+              </div>
             <div class="modal-actions">
               <button type="button" (click)="showCreateModal = false" class="btn-secondary">Cancel</button>
               <button type="submit" class="btn-primary" [disabled]="!newConversation.collection || !newConversation.title?.trim() || creating">
@@ -184,7 +208,14 @@ export class ConversationListComponent implements OnInit {
   showCreateModal = false;
   creating = false;
   createError = '';
-  newConversation = { collection: '', title: 'New Conversation' };
+  newConversation: any = {
+    collection: '',
+    title: 'New Conversation',
+    llm_model: 'meta-llama/Meta-Llama-3-8B-Instruct',
+    temperature: 0.5,
+    max_tokens: 4096,
+    top_k: 3
+  };
 
   constructor(
     private chatService: ChatService,

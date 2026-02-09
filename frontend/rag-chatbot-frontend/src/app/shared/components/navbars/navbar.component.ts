@@ -24,6 +24,7 @@ import { User } from '../../../core/models/user.model';
           <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
           <a routerLink="/collections" routerLinkActive="active">Collections</a>
           <a routerLink="/chat" routerLinkActive="active">Chat</a>
+          <a routerLink="/rag" routerLinkActive="active">RAG Upload & Chat</a>
         </div>
 
         <div class="navbar-user" *ngIf="currentUser">

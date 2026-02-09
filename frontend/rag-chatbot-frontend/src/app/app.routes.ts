@@ -30,6 +30,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'rag',
+    loadComponent: () => import('./features/rag/rag.component').then(m => m.RagComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: '**',
     redirectTo: '/dashboard'
   }

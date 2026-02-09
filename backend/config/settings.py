@@ -119,11 +119,14 @@ REST_FRAMEWORK = {
 }
 
 # CORS
-CORS_ALLOWED_ORIGINS = config(
-    'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000,http://localhost:8000,http://localhost:4200,http://localhost:4201',
-    cast=lambda v: [s.strip() for s in v.split(',')]
-)
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins in development
+else:
+    CORS_ALLOWED_ORIGINS = config(
+        'CORS_ALLOWED_ORIGINS',
+        default='http://localhost:3000,http://localhost:8000,http://localhost:4200,http://localhost:4201',
+        cast=lambda v: [s.strip() for s in v.split(',')]
+    )
 CORS_ALLOW_CREDENTIALS = True
 
 # Celery Configuration

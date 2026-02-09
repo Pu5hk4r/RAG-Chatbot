@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../../shared/components/navbars/navbar.component';
 import { LoadingComponent } from '../../../shared/components/loading/loading.component';
@@ -217,7 +217,10 @@ export class CollectionListComponent implements OnInit {
   createError = '';
   newCollection = { name: '', description: '' };
 
-  constructor(private documentService: DocumentService) {}
+  constructor(
+    private documentService: DocumentService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.loadCollections();
@@ -243,10 +246,23 @@ export class CollectionListComponent implements OnInit {
     this.creating = true;
     this.createError = '';
     this.documentService.createCollection(this.newCollection).subscribe({
-      next: () => {
+      next: (created) => {
+        // Close modal and reset
         this.showCreateModal = false;
         this.creating = false;
         this.newCollection = { name: '', description: '' };
+
+        // Navigate immediately to the collection detail so user can upload PDFs
+        try {
+          const id = (created as any).id;
+          if (id) {
+            this.router.navigate(['/collections', id], { state: { openUpload: true } });
+            return;
+          }
+        } catch (e) {
+          // fallback to reloading list
+        }
+
         this.loadCollections();
       },
       error: (error) => {

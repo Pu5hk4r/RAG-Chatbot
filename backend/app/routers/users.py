@@ -1,22 +1,22 @@
-from fastapi import APIRouter, Depends
-from app.middleware.auth_middleware import get_current_user
+from fastapi import APIRouter
+from app.db import collections_db
+from app.schema import CollectionInfo
 
-router = APIRouter(
-    prefix="/api/users",
-    tags=["users"]
-)
+router = APIRouter(prefix="/api", tags=["users"])
 
-@router.get("/me")
-async def get_current_user_info(
-    current_user: dict = Depends(get_current_user)
-):
-    """Get current user info"""
-    return current_user
 
-@router.get("/dashboard")
-async def get_dashboard(
-    current_user: dict = Depends(get_current_user)
-):
-    """Get user dashboard data"""
-    # ... dashboard logic
-    pass
+@router.get("/collections")
+async def list_collections():
+    collections = []
+
+    for cid, data in collections_db.items():
+        collections.append(
+            CollectionInfo(
+                id=cid,
+                name=data["name"],
+                document_count=len(data["files"]),
+                indexed=data["indexed"]
+            )
+        )
+
+    return {"collections": collections}
